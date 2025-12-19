@@ -55,8 +55,9 @@ html {
 /* Presentation container responsive styles */
 .presentation-container {
   width: 100%;
-  overflow-x: auto;
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
+  position: relative;
 }
 
 .presentation-container img {
@@ -71,15 +72,36 @@ html {
   -webkit-overflow-scrolling: touch;
 }
 
+/* Ensure embedded presentation HTML scales properly */
+.presentation-container body {
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.presentation-container .slides-stack {
+  padding: 0 !important;
+  margin: 0 !important;
+  width: 100% !important;
+}
+
+.presentation-container .slide-wrapper {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+}
+
+.presentation-container .slide-iframe {
+  pointer-events: auto;
+}
+
 @media (max-width: 640px) {
   .presentation-container {
     padding: 0;
+    margin: 0;
   }
   
-  .presentation-container iframe {
-    width: 100%;
-    height: auto;
-    min-height: 200px;
+  .presentation-container .slides-stack {
+    gap: 12px !important;
   }
 }
 

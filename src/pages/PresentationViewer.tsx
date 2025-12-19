@@ -1,5 +1,5 @@
 import { useParams, Link, Navigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { getCourseById, getPresentationById } from '../data/courses';
 
 export function PresentationViewer() {
@@ -7,6 +7,7 @@ export function PresentationViewer() {
   const [presentationHtml, setPresentationHtml] = useState<string>('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   const course = courseId ? getCourseById(courseId) : undefined;
   const presentation = courseId && presentationId 
@@ -44,6 +45,50 @@ export function PresentationViewer() {
         setLoading(false);
       });
   }, [presentationId]);
+
+  // Trigger scaling after presentation HTML is loaded
+  useEffect(() => {
+    if (!presentationHtml || loading) return;
+
+    const triggerScaling = () => {
+      // Dispatch resize event to trigger the scaling script in the presentation HTML
+      window.dispatchEvent(new Event('resize'));
+      
+      // Also manually trigger scaling if script is available
+      setTimeout(() => {
+        const wrappers = containerRef.current?.querySelectorAll('.slide-wrapper');
+        if (wrappers && wrappers.length > 0) {
+          const slideWidth = 1280;
+          const slideHeight = 720;
+          
+          wrappers.forEach((wrapper: Element) => {
+            const iframe = wrapper.querySelector('.slide-iframe') as HTMLIFrameElement;
+            if (iframe && (wrapper as HTMLElement).offsetWidth > 0) {
+              const availableWidth = (wrapper as HTMLElement).offsetWidth;
+              const scale = availableWidth / slideWidth;
+              
+              iframe.style.transform = `scale(${scale})`;
+              iframe.style.width = `${slideWidth}px`;
+              iframe.style.height = `${slideHeight}px`;
+              
+              const scaledHeight = slideHeight * scale;
+              (wrapper as HTMLElement).style.height = `${scaledHeight}px`;
+            }
+          });
+        }
+      }, 100);
+    };
+
+    // Multiple attempts to ensure scaling works after HTML injection
+    triggerScaling();
+    setTimeout(triggerScaling, 200);
+    setTimeout(triggerScaling, 500);
+    setTimeout(triggerScaling, 1000);
+
+    // Listen for window resize
+    window.addEventListener('resize', triggerScaling);
+    return () => window.removeEventListener('resize', triggerScaling);
+  }, [presentationHtml, loading]);
 
   if (!course || !presentation) {
     return <Navigate to="/courses" replace />;
@@ -106,6 +151,7 @@ export function PresentationViewer() {
 
       {/* Presentation Content */}
       <div
+        ref={containerRef}
         className="presentation-container"
         dangerouslySetInnerHTML={{ __html: presentationHtml }}
       />
