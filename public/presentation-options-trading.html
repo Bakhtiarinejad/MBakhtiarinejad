@@ -15,7 +15,7 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
             min-height: 100vh;
-            padding: 20px 10px;
+            padding: 0;
             margin: 0;
             width: 100%;
             overflow-x: hidden;
@@ -24,17 +24,17 @@
         .slides-stack {
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: stretch;
             gap: 20px;
             max-width: 1280px;
             margin: 0 auto;
-            padding: 0;
+            padding: 20px 16px;
             width: 100%;
+            box-sizing: border-box;
         }
         
         .slide-wrapper {
             width: 100%;
-            max-width: 1280px;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 
@@ -43,7 +43,7 @@
             background: #fff;
             transition: box-shadow 0.3s ease;
             position: relative;
-            margin: 0 auto;
+            margin: 0;
         }
         
         .slide-wrapper:hover {
@@ -64,11 +64,15 @@
         }
         
         /* Mobile responsive styles */
-        @media (max-width: 768px) {
-            body {
-                padding: 12px 8px !important;
-            }
+        @media (max-width: 1024px) {
             .slides-stack {
+                padding: 20px 24px;
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .slides-stack {
+                padding: 16px 24px;
                 gap: 16px !important;
             }
             .slide-wrapper {
@@ -76,11 +80,15 @@
             }
         }
         
-        @media (max-width: 480px) {
-            body {
-                padding: 8px 4px !important;
-            }
+        @media (max-width: 640px) {
             .slides-stack {
+                padding: 16px 16px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .slides-stack {
+                padding: 12px 16px;
                 gap: 12px !important;
             }
             .slide-wrapper {
@@ -89,10 +97,8 @@
         }
         
         @media (max-width: 360px) {
-            body {
-                padding: 4px 2px !important;
-            }
             .slides-stack {
+                padding: 8px 12px;
                 gap: 8px !important;
             }
         }
@@ -4031,7 +4037,7 @@
             wrappers.forEach(wrapper => {
                 const iframe = wrapper.querySelector('.slide-iframe');
                 if (iframe && wrapper.offsetWidth > 0) {
-                    // Calculate available width (accounting for any padding)
+                    // Get the full available width of the wrapper
                     const availableWidth = wrapper.offsetWidth;
                     const scale = availableWidth / slideWidth;
                     
@@ -4043,6 +4049,7 @@
                     // Set wrapper height based on scaled slide height
                     const scaledHeight = slideHeight * scale;
                     wrapper.style.height = `${scaledHeight}px`;
+                    wrapper.style.width = '100%';
                 }
             });
         }
