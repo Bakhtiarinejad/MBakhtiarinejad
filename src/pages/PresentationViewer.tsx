@@ -1,0 +1,115 @@
+import { useParams, Link, Navigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
+import { getCourseById, getPresentationById } from '../data/courses';
+
+export function PresentationViewer() {
+  const { courseId, presentationId } = useParams<{ courseId: string; presentationId: string }>();
+  const [presentationHtml, setPresentationHtml] = useState<string>('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const course = courseId ? getCourseById(courseId) : undefined;
+  const presentation = courseId && presentationId 
+    ? getPresentationById(courseId, presentationId) 
+    : undefined;
+
+  useEffect(() => {
+    if (!presentationId) return;
+
+    // Map presentation IDs to their HTML files
+    const presentationMap: Record<string, string> = {
+      'options-trading-intro': '/presentation-options-trading.html',
+    };
+
+    const htmlFile = presentationMap[presentationId];
+    if (!htmlFile) {
+      setError('Presentation not found');
+      setLoading(false);
+      return;
+    }
+
+    fetch(htmlFile)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error('Failed to load presentation');
+        }
+        return response.text();
+      })
+      .then((html) => {
+        setPresentationHtml(html);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError(err.message);
+        setLoading(false);
+      });
+  }, [presentationId]);
+
+  if (!course || !presentation) {
+    return <Navigate to="/courses" replace />;
+  }
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[var(--color-accent)] mx-auto mb-4"></div>
+          <p className="text-[var(--color-text-secondary)]">Loading presentation...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-red-50 border border-red-200 rounded-lg p-6">
+          <h2 className="text-xl font-semibold text-red-800 mb-2">Error</h2>
+          <p className="text-red-600">{error}</p>
+          <Link
+            to={`/course/${courseId}`}
+            className="inline-block mt-4 text-[var(--color-accent)] hover:underline"
+          >
+            ← Back to Course
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-900">
+      {/* Header Bar */}
+      <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <Link
+                to={`/course/${courseId}`}
+                className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
+              >
+                ← Back to {course.title}
+              </Link>
+              <h1 className="text-xl font-semibold text-[var(--color-text-primary)] mt-1">
+                {presentation.title}
+              </h1>
+            </div>
+            <button
+              onClick={() => window.print()}
+              className="px-4 py-2 bg-[var(--color-accent)] text-white rounded-lg hover:bg-[var(--color-secondary)] transition-colors text-sm font-medium"
+            >
+              Print / Save PDF
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Presentation Content */}
+      <div
+        className="presentation-container"
+        dangerouslySetInnerHTML={{ __html: presentationHtml }}
+      />
+    </div>
+  );
+}
+
