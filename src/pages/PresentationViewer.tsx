@@ -1,116 +1,33 @@
 import { useParams, Link, Navigate } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
+import { useState } from 'react';
 import { getCourseById, getPresentationById } from '../data/courses';
 
 export function PresentationViewer() {
   const { courseId, presentationId } = useParams<{ courseId: string; presentationId: string }>();
-  const [presentationHtml, setPresentationHtml] = useState<string>('');
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
 
   const course = courseId ? getCourseById(courseId) : undefined;
   const presentation = courseId && presentationId 
     ? getPresentationById(courseId, presentationId) 
     : undefined;
 
-  useEffect(() => {
-    if (!presentationId) return;
+  // Map presentation IDs to their HTML files
+  const presentationMap: Record<string, string> = {
+    'options-trading-intro': '/presentation-options-trading.html',
+  };
 
-    // Map presentation IDs to their HTML files
-    const presentationMap: Record<string, string> = {
-      'options-trading-intro': '/presentation-options-trading.html',
-    };
-
-    const htmlFile = presentationMap[presentationId];
-    if (!htmlFile) {
-      setError('Presentation not found');
-      setLoading(false);
-      return;
-    }
-
-    fetch(htmlFile)
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error('Failed to load presentation');
-        }
-        return response.text();
-      })
-      .then((html) => {
-        setPresentationHtml(html);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setError(err.message);
-        setLoading(false);
-      });
-  }, [presentationId]);
-
-  // Trigger scaling after presentation HTML is loaded
-  useEffect(() => {
-    if (!presentationHtml || loading) return;
-
-    const triggerScaling = () => {
-      // Dispatch resize event to trigger the scaling script in the presentation HTML
-      window.dispatchEvent(new Event('resize'));
-      
-      // Also manually trigger scaling if script is available
-      setTimeout(() => {
-        const wrappers = containerRef.current?.querySelectorAll('.slide-wrapper');
-        if (wrappers && wrappers.length > 0) {
-          const slideWidth = 1280;
-          const slideHeight = 720;
-          
-          wrappers.forEach((wrapper: Element) => {
-            const iframe = wrapper.querySelector('.slide-iframe') as HTMLIFrameElement;
-            if (iframe && (wrapper as HTMLElement).offsetWidth > 0) {
-              const availableWidth = (wrapper as HTMLElement).offsetWidth;
-              const scale = availableWidth / slideWidth;
-              
-              iframe.style.transform = `scale(${scale})`;
-              iframe.style.width = `${slideWidth}px`;
-              iframe.style.height = `${slideHeight}px`;
-              
-              const scaledHeight = slideHeight * scale;
-              (wrapper as HTMLElement).style.height = `${scaledHeight}px`;
-            }
-          });
-        }
-      }, 100);
-    };
-
-    // Multiple attempts to ensure scaling works after HTML injection
-    triggerScaling();
-    setTimeout(triggerScaling, 200);
-    setTimeout(triggerScaling, 500);
-    setTimeout(triggerScaling, 1000);
-
-    // Listen for window resize
-    window.addEventListener('resize', triggerScaling);
-    return () => window.removeEventListener('resize', triggerScaling);
-  }, [presentationHtml, loading]);
+  const presentationUrl = presentationId ? presentationMap[presentationId] : undefined;
 
   if (!course || !presentation) {
     return <Navigate to="/courses" replace />;
   }
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-[var(--color-accent)] mx-auto mb-4"></div>
-          <p className="text-sm sm:text-base text-[var(--color-text-secondary)]">Loading presentation...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
+  if (!presentationUrl) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 sm:p-6">
           <h2 className="text-lg sm:text-xl font-semibold text-red-800 mb-2">Error</h2>
-          <p className="text-sm sm:text-base text-red-600 mb-4">{error}</p>
+          <p className="text-sm sm:text-base text-red-600 mb-4">Presentation not found</p>
           <Link
             to={`/course/${courseId}`}
             className="inline-block text-sm sm:text-base text-[var(--color-accent)] hover:underline"
@@ -123,7 +40,7 @@ export function PresentationViewer() {
   }
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}>
+    <div className="min-h-screen flex flex-col">
       {/* Header Bar */}
       <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 sm:py-4">
@@ -149,11 +66,26 @@ export function PresentationViewer() {
         </div>
       </div>
 
-      {/* Presentation Content */}
-      <div
-        ref={containerRef}
-        className="presentation-container"
-        dangerouslySetInnerHTML={{ __html: presentationHtml }}
+      {/* Loading indicator */}
+      {loading && (
+        <div className="flex-1 flex items-center justify-center" style={{ background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)' }}>
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-white mx-auto mb-4"></div>
+            <p className="text-sm sm:text-base text-white/70">Loading presentation...</p>
+          </div>
+        </div>
+      )}
+
+      {/* Presentation iframe */}
+      <iframe
+        src={presentationUrl}
+        className="flex-1 w-full border-none"
+        style={{ 
+          display: loading ? 'none' : 'block',
+          minHeight: 'calc(100vh - 80px)'
+        }}
+        onLoad={() => setLoading(false)}
+        title={presentation.title}
       />
     </div>
   );
