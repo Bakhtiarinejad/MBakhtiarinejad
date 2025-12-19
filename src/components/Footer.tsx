@@ -61,7 +61,7 @@ export function Footer() {
             <ul className="space-y-2">
               <li>
                 <a
-                  href="https://linkedin.com"
+                  href="https://www.linkedin.com/in/mohammadali-bakhtiarinejad-669a13145/"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
@@ -81,7 +81,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="mailto:your.email@example.com"
+                  href="mailto:ma.bakhtiarinejad@gmail.com"
                   className="text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
                 >
                   Email
