@@ -50,7 +50,7 @@ Edit `src/data/courses.ts`:
 export const courses: Course[] = [
   {
     id: 'derivatives',
-    title: 'Derivatives Trading',
+    title: 'Derivatives',
     description: '...',
     category: 'Finance',
     presentations: [

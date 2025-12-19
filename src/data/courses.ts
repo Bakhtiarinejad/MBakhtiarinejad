@@ -17,8 +17,8 @@ export interface Course {
 export const courses: Course[] = [
   {
     id: 'derivatives',
-    title: 'Derivatives Trading',
-    description: 'Comprehensive course on derivatives trading, including options, futures, and advanced strategies.',
+    title: 'Derivatives',
+    description: 'Comprehensive course on derivatives, including options, futures, and advanced strategies.',
     category: 'Finance',
     presentations: [
       {
