@@ -11,20 +11,28 @@
             box-sizing: border-box;
         }
         
+        html {
+            width: 100%;
+            min-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+        
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            background: transparent;
             min-height: 100vh;
             padding: 0;
             margin: 0;
             width: 100%;
+            min-width: 100%;
             overflow-x: hidden;
         }
         
         .slides-stack {
             display: flex;
             flex-direction: column;
-            align-items: stretch;
+            align-items: center;
             gap: 20px;
             max-width: 1280px;
             margin: 0 auto;
