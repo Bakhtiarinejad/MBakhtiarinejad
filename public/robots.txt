@@ -3,5 +3,5 @@ Allow: /
 Disallow: /api/
 Disallow: /admin/
 
-Sitemap: https://your-domain.com/sitemap.xml
+Sitemap: https://mbakhtiarinejad.pages.dev/sitemap.xml
 
