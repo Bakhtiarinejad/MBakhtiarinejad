@@ -16,7 +16,7 @@ A modern personal website built with React, TypeScript, and Tailwind CSS, featur
 
 - Node.js 18+ and npm
 
-### Installation
+### Installations
 
 ```bash
 npm install
