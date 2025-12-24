@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-Content-Type-Options" content="nosniff" />
+    <meta http-equiv="X-Frame-Options" content="SAMEORIGIN" />
+    <title>Option Calculators</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        html, body { width: 100%; min-width: 100%; margin: 0; padding: 0; }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #0a0a1a 0%, #1a1a3e 50%, #2d1b4e 100%);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        .slides-stack {
+            display: flex; flex-direction: column; align-items: center; gap: 20px;
+            max-width: 1280px; margin: 0 auto; padding: 20px 16px; width: 100%;
+        }
+        .slide-wrapper {
+            width: 100%; border-radius: 12px; overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+            background: #fff; transition: box-shadow 0.3s ease; position: relative;
+        }
+        .slide-wrapper:hover { box-shadow: 0 35px 60px -15px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.15); }
+        .slide-iframe { width: 1280px; height: 720px; border: none; transform-origin: top left; position: absolute; top: 0; left: 0; }
+        
+        /* Calculator Slides */
+        .calculator-slide {
+            width: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.1);
+        }
+        .calc-header {
+            padding: 25px 40px 18px;
+            color: #fff;
+        }
+        .calc-header.red { background: linear-gradient(135deg, #e63946 0%, #ff6b6b 100%); }
+        .calc-header.blue { background: linear-gradient(135deg, #0077b6 0%, #00b4d8 100%); }
+        .calc-header.purple { background: linear-gradient(135deg, #7b2cbf 0%, #9b5de5 100%); }
+        .calc-header.green { background: linear-gradient(135deg, #2a9d8f 0%, #57cc99 100%); }
+        .calc-title {
+            font-family: 'Playfair Display', Georgia, serif;
+            font-size: 28px;
+            font-weight: 700;
+        }
+        .calc-subtitle {
+            font-size: 14px;
+            color: rgba(255,255,255,0.9);
+            margin-top: 4px;
+        }
+        .calc-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            padding: 25px 40px 35px;
+        }
+        .calc-content.three-col {
+            grid-template-columns: 1fr 1.2fr 1fr;
+        }
+        @media (max-width: 900px) {
+            .calc-content { grid-template-columns: 1fr; padding: 20px; }
+            .calc-content.three-col { grid-template-columns: 1fr; }
+            .calc-header { padding: 20px; }
+            .calc-title { font-size: 22px; }
+        }
+        .input-section, .output-section {
+            background: rgba(255,255,255,0.05);
+            border-radius: 14px;
+            padding: 20px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .section-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .section-title span { font-size: 18px; }
+        .input-group {
+            margin-bottom: 14px;
+        }
+        .input-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+        .input-label-text {
+            font-size: 12px;
+            color: #a8b2d1;
+            font-weight: 600;
+        }
+        .input-label-symbol {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: #ff6b6b;
+            background: rgba(230,57,70,0.2);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        .input-label-symbol.blue { color: #00b4d8; background: rgba(0,180,216,0.2); }
+        .input-label-symbol.purple { color: #9b5de5; background: rgba(155,93,229,0.2); }
+        .input-label-symbol.green { color: #57cc99; background: rgba(87,204,153,0.2); }
+        .input-field {
+            width: 100%;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            outline: none;
+            border-color: #ff6b6b;
+            background: rgba(0,0,0,0.5);
+        }
+        .input-field.blue:focus { border-color: #00b4d8; }
+        .input-field.purple:focus { border-color: #9b5de5; }
+        .input-field.green:focus { border-color: #57cc99; }
+        .input-field::placeholder { color: #5a6a8a; }
+        select.input-field {
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a8b2d1' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 35px;
+        }
+        .result-box {
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .result-box.red {
+            background: linear-gradient(135deg, rgba(230,57,70,0.2), rgba(255,107,107,0.1));
+            border: 2px solid rgba(230,57,70,0.3);
+        }
+        .result-box.blue {
+            background: linear-gradient(135deg, rgba(0,119,182,0.2), rgba(0,180,216,0.1));
+            border: 2px solid rgba(0,180,216,0.3);
+        }
+        .result-box.purple {
+            background: linear-gradient(135deg, rgba(123,44,191,0.2), rgba(155,93,229,0.1));
+            border: 2px solid rgba(155,93,229,0.3);
+        }
+        .result-box.green {
+            background: linear-gradient(135deg, rgba(42,157,143,0.2), rgba(87,204,153,0.1));
+            border: 2px solid rgba(87,204,153,0.3);
+        }
+        .result-label {
+            font-size: 12px;
+            color: #a8b2d1;
+            margin-bottom: 6px;
+        }
+        .result-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .result-unit {
+            font-size: 12px;
+            color: #ff6b6b;
+            margin-top: 4px;
+        }
+        .result-unit.blue { color: #00b4d8; }
+        .result-unit.purple { color: #9b5de5; }
+        .result-unit.green { color: #57cc99; }
+        .formula-display {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        .formula-text {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            color: #ff6b6b;
+        }
+        .formula-text.blue { color: #00b4d8; }
+        .formula-text.purple { color: #9b5de5; }
+        .calc-mode {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .mode-btn {
+            padding: 10px 8px;
+            border-radius: 8px;
+            border: 2px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.2);
+            color: #a8b2d1;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .mode-btn:hover { border-color: rgba(255,255,255,0.3); }
+        .mode-btn.active {
+            background: linear-gradient(135deg, #e63946, #ff6b6b);
+            border-color: transparent;
+            color: #fff;
+        }
+        .mode-btn.active.blue { background: linear-gradient(135deg, #0077b6, #00b4d8); }
+        .mode-btn.active.purple { background: linear-gradient(135deg, #7b2cbf, #9b5de5); }
+        
+        /* Strategy Builder specific */
+        .strategy-legs {
+            max-height: 280px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        .leg-card {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        .leg-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .leg-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+        }
+        .leg-remove {
+            background: rgba(230,57,70,0.3);
+            border: none;
+            color: #ff6b6b;
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .leg-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 8px;
+        }
+        .leg-input {
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.3);
+            color: #fff;
+            font-size: 12px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .leg-input:focus {
+            outline: none;
+            border-color: #0077b6;
+        }
+        .add-leg-btn {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: 2px dashed rgba(0,180,216,0.4);
+            background: transparent;
+            color: #00b4d8;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .add-leg-btn:hover {
+            background: rgba(0,180,216,0.1);
+            border-color: rgba(0,180,216,0.6);
+        }
+        .strategy-presets {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 15px;
+        }
+        .preset-btn {
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.1);
+            background: rgba(0,0,0,0.2);
+            color: #a8b2d1;
+            font-size: 11px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .preset-btn:hover {
+            background: rgba(0,180,216,0.2);
+            border-color: rgba(0,180,216,0.4);
+            color: #00b4d8;
+        }
+        
+        /* Payoff chart */
+        .payoff-chart {
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            padding: 15px;
+            height: 200px;
+            position: relative;
+        }
+        .chart-canvas {
+            width: 100%;
+            height: 100%;
+        }
+        
+        /* Greeks display */
+        .greeks-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 8px;
+            margin-top: 15px;
+        }
+        .greek-item {
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+        .greek-symbol {
+            font-size: 16px;
+            font-weight: 700;
+            color: #9b5de5;
+            margin-bottom: 4px;
+        }
+        .greek-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: #fff;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        .greek-name {
+            font-size: 10px;
+            color: #5a6a8a;
+            margin-top: 2px;
+        }
+
+        @media (max-width: 768px) { 
+            .slides-stack { padding: 16px 24px; gap: 16px !important; } 
+            .slide-wrapper { border-radius: 8px; }
+            .greeks-grid { grid-template-columns: repeat(3, 1fr); }
+            .leg-inputs { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 480px) { 
+            .slides-stack { padding: 12px 16px; gap: 12px !important; } 
+            .slide-wrapper { border-radius: 6px; } 
+        }
+    </style>
+</head>
+<body>
+    <div class="slides-stack">
+        <!-- Slide 1: Title -->
+        <div class="slide-wrapper">
+            <iframe srcdoc="<!DOCTYPE html><html><head><meta charset='UTF-8'><link href='https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600;700&display=swap' rel='stylesheet'><link href='https://fonts.googleapis.com/icon?family=Material+Icons' rel='stylesheet'><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',sans-serif;overflow:hidden}.slide{width:1280px;height:720px;background:linear-gradient(135deg,#0a0a1a 0%,#1a1a3e 50%,#2d1b4e 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;color:#fff;position:relative}.overlay{position:absolute;top:0;left:0;right:0;bottom:0;background:radial-gradient(ellipse at 30% 20%,rgba(155,93,229,0.2),transparent 50%)}.content{position:relative;z-index:2;padding:60px}.hero{font-family:'Playfair Display',serif;font-size:72px;font-weight:900;margin-bottom:20px;background:linear-gradient(135deg,#fff,#9b5de5);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}.sub{font-size:24px;color:#a8b2d1;margin-bottom:40px}.tools-row{display:flex;justify-content:center;gap:30px;margin-top:20px}.tool-box{width:180px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:25px;text-align:center}.tool-icon{font-size:40px;margin-bottom:12px}.tool-name{font-size:14px;font-weight:700;color:#fff}.tool-desc{font-size:11px;color:#5a6a8a;margin-top:6px}</style></head><body><div class='slide'><div class='overlay'></div><div class='content'><h1 class='hero'>Option Calculators</h1><div class='sub'>Interactive Tools for Options Trading</div><div class='tools-row'><div class='tool-box'><div class='tool-icon'>⚖️</div><div class='tool-name'>Put-Call Parity</div><div class='tool-desc'>Arbitrage & pricing</div></div><div class='tool-box'><div class='tool-icon'>🏗️</div><div class='tool-name'>Strategy Builder</div><div class='tool-desc'>Multi-leg positions</div></div><div class='tool-box'><div class='tool-icon'>📊</div><div class='tool-name'>Black-Scholes</div><div class='tool-desc'>Option pricing model</div></div></div></div></div></body></html>" class="slide-iframe" frameborder="0" scrolling="no"></iframe>
+        </div>
+
+        <!-- Slide 2: Put-Call Parity Calculator -->
+        <div class="calculator-slide" id="pcp-calculator">
+            <div class="calc-header red">
+                <h1 class="calc-title">⚖️ Put-Call Parity Calculator</h1>
+                <div class="calc-subtitle">C + PV(K) = P + S — Calculate any missing variable or check for arbitrage</div>
+            </div>
+            <div class="calc-content">
+                <div class="input-section">
+                    <div class="section-title"><span>📊</span> Input Variables</div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span class="input-label-text">Stock Price</span>
+                            <span class="input-label-symbol">S</span>
+                        </div>
+                        <input type="number" class="input-field" id="pcp-stock" placeholder="e.g., 100" step="0.01">
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span class="input-label-text">Strike Price</span>
+                            <span class="input-label-symbol">K</span>
+                        </div>
+                        <input type="number" class="input-field" id="pcp-strike" placeholder="e.g., 105" step="0.01">
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span class="input-label-text">Call Option Price</span>
+                            <span class="input-label-symbol">C</span>
+                        </div>
+                        <input type="number" class="input-field" id="pcp-call" placeholder="e.g., 8.50" step="0.01">
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span class="input-label-text">Put Option Price</span>
+                            <span class="input-label-symbol">P</span>
+                        </div>
+                        <input type="number" class="input-field" id="pcp-put" placeholder="e.g., 10.25" step="0.01">
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span class="input-label-text">Risk-Free Rate (annual %)</span>
+                            <span class="input-label-symbol">r</span>
+                        </div>
+                        <input type="number" class="input-field" id="pcp-rate" placeholder="e.g., 5" step="0.01" value="5">
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span class="input-label-text">Time to Expiration (years)</span>
+                            <span class="input-label-symbol">T</span>
+                        </div>
+                        <input type="number" class="input-field" id="pcp-time" placeholder="e.g., 0.5" step="0.01" value="0.5">
+                    </div>
+                </div>
+                
+                <div class="output-section">
+                    <div class="section-title"><span>🎯</span> Calculate</div>
+                    
+                    <div class="calc-mode">
+                        <button class="mode-btn active" onclick="setPCPMode('call')" id="pcp-mode-call">Find Call (C)</button>
+                        <button class="mode-btn" onclick="setPCPMode('put')" id="pcp-mode-put">Find Put (P)</button>
+                        <button class="mode-btn" onclick="setPCPMode('stock')" id="pcp-mode-stock">Find Stock (S)</button>
+                        <button class="mode-btn" onclick="setPCPMode('rate')" id="pcp-mode-rate">Find Rate (r)</button>
+                        <button class="mode-btn" onclick="setPCPMode('arbitrage')" id="pcp-mode-arbitrage" style="grid-column: span 2">Check Arbitrage</button>
+                    </div>
+                    
+                    <div class="result-box red">
+                        <div class="result-label" id="pcp-result-label">Calculated Call Price</div>
+                        <div class="result-value" id="pcp-result-value">—</div>
+                        <div class="result-unit" id="pcp-result-unit"></div>
+                    </div>
+                    
+                    <div class="formula-display">
+                        <div class="formula-text" id="pcp-formula">C = P + S − K×e<sup>−rT</sup></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: Option Strategy Builder -->
+        <div class="calculator-slide" id="strategy-builder">
+            <div class="calc-header blue">
+                <h1 class="calc-title">🏗️ Option Strategy Builder</h1>
+                <div class="calc-subtitle">Build multi-leg option strategies and visualize payoffs</div>
+            </div>
+            <div class="calc-content three-col">
+                <div class="input-section">
+                    <div class="section-title"><span>📋</span> Quick Strategies</div>
+                    
+                    <div class="strategy-presets">
+                        <button class="preset-btn" onclick="loadStrategy('longCall')">Long Call</button>
+                        <button class="preset-btn" onclick="loadStrategy('longPut')">Long Put</button>
+                        <button class="preset-btn" onclick="loadStrategy('coveredCall')">Covered Call</button>
+                        <button class="preset-btn" onclick="loadStrategy('protectivePut')">Protective Put</button>
+                        <button class="preset-btn" onclick="loadStrategy('bullCallSpread')">Bull Call Spread</button>
+                        <button class="preset-btn" onclick="loadStrategy('bearPutSpread')">Bear Put Spread</button>
+                        <button class="preset-btn" onclick="loadStrategy('longStraddle')">Long Straddle</button>
+                        <button class="preset-btn" onclick="loadStrategy('ironCondor')">Iron Condor</button>
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span class="input-label-text">Current Stock Price</span>
+                            <span class="input-label-symbol blue">S₀</span>
+                        </div>
+                        <input type="number" class="input-field blue" id="strat-stock" placeholder="100" step="0.01" value="100">
+                    </div>
+                    
+                    <button class="add-leg-btn" onclick="addLeg()">+ Add Option Leg</button>
+                </div>
+                
+                <div class="output-section">
+                    <div class="section-title"><span>📈</span> Strategy Legs</div>
+                    <div class="strategy-legs" id="strategy-legs">
+                        <!-- Legs will be added here -->
+                    </div>
+                    <div class="payoff-chart">
+                        <canvas id="payoff-canvas" class="chart-canvas"></canvas>
+                    </div>
+                </div>
+                
+                <div class="output-section">
+                    <div class="section-title"><span>💰</span> Strategy Summary</div>
+                    
+                    <div class="result-box blue">
+                        <div class="result-label">Net Premium</div>
+                        <div class="result-value" id="strat-premium">$0.00</div>
+                        <div class="result-unit blue" id="strat-premium-type">—</div>
+                    </div>
+                    
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+                        <div class="result-box blue" style="padding:15px">
+                            <div class="result-label">Max Profit</div>
+                            <div class="result-value" style="font-size:22px;color:#57cc99" id="strat-max-profit">—</div>
+                        </div>
+                        <div class="result-box blue" style="padding:15px">
+                            <div class="result-label">Max Loss</div>
+                            <div class="result-value" style="font-size:22px;color:#ff6b6b" id="strat-max-loss">—</div>
+                        </div>
+                    </div>
+                    
+                    <div class="result-box blue" style="padding:15px;margin-top:10px">
+                        <div class="result-label">Breakeven Point(s)</div>
+                        <div class="result-value" style="font-size:20px" id="strat-breakeven">—</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Black-Scholes Calculator -->
+        <div class="calculator-slide" id="bs-calculator">
+            <div class="calc-header purple">
+                <h1 class="calc-title">📊 Black-Scholes Calculator</h1>
+                <div class="calc-subtitle">Calculate theoretical option prices and Greeks</div>
+            </div>
+            <div class="calc-content">
+                <div class="input-section">
+                    <div class="section-title"><span>📊</span> Input Parameters</div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span class="input-label-text">Stock Price</span>
+                            <span class="input-label-symbol purple">S</span>
+                        </div>
+                        <input type="number" class="input-field purple" id="bs-stock" placeholder="e.g., 100" step="0.01" value="100">
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span class="input-label-text">Strike Price</span>
+                            <span class="input-label-symbol purple">K</span>
+                        </div>
+                        <input type="number" class="input-field purple" id="bs-strike" placeholder="e.g., 105" step="0.01" value="100">
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span class="input-label-text">Time to Expiration (years)</span>
+                            <span class="input-label-symbol purple">T</span>
+                        </div>
+                        <input type="number" class="input-field purple" id="bs-time" placeholder="e.g., 0.5" step="0.01" value="0.5">
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span class="input-label-text">Risk-Free Rate (%)</span>
+                            <span class="input-label-symbol purple">r</span>
+                        </div>
+                        <input type="number" class="input-field purple" id="bs-rate" placeholder="e.g., 5" step="0.01" value="5">
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span class="input-label-text">Volatility (%)</span>
+                            <span class="input-label-symbol purple">σ</span>
+                        </div>
+                        <input type="number" class="input-field purple" id="bs-volatility" placeholder="e.g., 20" step="0.1" value="20">
+                    </div>
+                    
+                    <div class="input-group">
+                        <div class="input-label">
+                            <span class="input-label-text">Dividend Yield (%)</span>
+                            <span class="input-label-symbol purple">q</span>
+                        </div>
+                        <input type="number" class="input-field purple" id="bs-dividend" placeholder="e.g., 0" step="0.01" value="0">
+                    </div>
+                </div>
+                
+                <div class="output-section">
+                    <div class="section-title"><span>💰</span> Option Prices</div>
+                    
+                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:20px">
+                        <div class="result-box purple">
+                            <div class="result-label">Call Option Price</div>
+                            <div class="result-value" id="bs-call-price">—</div>
+                            <div class="result-unit purple">European Call</div>
+                        </div>
+                        <div class="result-box purple">
+                            <div class="result-label">Put Option Price</div>
+                            <div class="result-value" id="bs-put-price">—</div>
+                            <div class="result-unit purple">European Put</div>
+                        </div>
+                    </div>
+                    
+                    <div class="section-title"><span>🔢</span> The Greeks</div>
+                    <div class="greeks-grid">
+                        <div class="greek-item">
+                            <div class="greek-symbol">Δ</div>
+                            <div class="greek-value" id="bs-delta">—</div>
+                            <div class="greek-name">Delta</div>
+                        </div>
+                        <div class="greek-item">
+                            <div class="greek-symbol">Γ</div>
+                            <div class="greek-value" id="bs-gamma">—</div>
+                            <div class="greek-name">Gamma</div>
+                        </div>
+                        <div class="greek-item">
+                            <div class="greek-symbol">Θ</div>
+                            <div class="greek-value" id="bs-theta">—</div>
+                            <div class="greek-name">Theta</div>
+                        </div>
+                        <div class="greek-item">
+                            <div class="greek-symbol">V</div>
+                            <div class="greek-value" id="bs-vega">—</div>
+                            <div class="greek-name">Vega</div>
+                        </div>
+                        <div class="greek-item">
+                            <div class="greek-symbol">ρ</div>
+                            <div class="greek-value" id="bs-rho">—</div>
+                            <div class="greek-name">Rho</div>
+                        </div>
+                    </div>
+                    
+                    <div class="formula-display" style="margin-top:15px">
+                        <div class="formula-text purple">d₁ = [ln(S/K) + (r - q + σ²/2)T] / (σ√T)</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Summary -->
+        <div class="slide-wrapper">
+            <iframe srcdoc="<!DOCTYPE html><html><head><meta charset='UTF-8'><link href='https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;600;700&display=swap' rel='stylesheet'><style>*{margin:0;padding:0;box-sizing:border-box}body{font-family:'Inter',sans-serif;overflow:hidden}.slide{width:1280px;height:720px;background:linear-gradient(135deg,#0a0a1a 0%,#1a1a3e 50%,#2d1b4e 100%);display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;position:relative}.content{text-align:center;max-width:1000px;padding:40px}.title{font-family:'Playfair Display',serif;font-size:48px;font-weight:900;margin-bottom:40px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:25px}.item{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:16px;padding:30px;text-align:left}.item-icon{font-size:36px;margin-bottom:15px}.item-title{font-size:18px;font-weight:700;margin-bottom:10px}.item-text{font-size:13px;color:#a8b2d1;line-height:1.6}.item:nth-child(1){border-top:3px solid #ff6b6b}.item:nth-child(2){border-top:3px solid #00b4d8}.item:nth-child(3){border-top:3px solid #9b5de5}.footer{margin-top:40px;font-size:16px;color:#5a6a8a}</style></head><body><div class='slide'><div class='content'><h1 class='title'>Calculator Summary</h1><div class='grid'><div class='item'><div class='item-icon'>⚖️</div><div class='item-title'>Put-Call Parity</div><div class='item-text'>• Find missing option prices<br>• Calculate implied rates<br>• Detect arbitrage opportunities<br>• Verify market efficiency</div></div><div class='item'><div class='item-icon'>🏗️</div><div class='item-title'>Strategy Builder</div><div class='item-text'>• Build multi-leg strategies<br>• Visualize payoff diagrams<br>• Calculate max profit/loss<br>• Find breakeven points</div></div><div class='item'><div class='item-icon'>📊</div><div class='item-title'>Black-Scholes</div><div class='item-text'>• Price European options<br>• Calculate all Greeks<br>• Analyze sensitivities<br>• Understand fair value</div></div></div><div class='footer'>Essential tools for options traders and risk managers</div></div></div></body></html>" class="slide-iframe" frameborder="0" scrolling="no"></iframe>
+        </div>
+    </div>
+
+    <script>
+        // ============ PUT-CALL PARITY CALCULATOR ============
+        let pcpMode = 'call';
+        
+        function setPCPMode(mode) {
+            pcpMode = mode;
+            document.querySelectorAll('#pcp-calculator .mode-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById('pcp-mode-' + mode).classList.add('active');
+            calculatePCP();
+        }
+        
+        function getPCPInputs() {
+            return {
+                S: parseFloat(document.getElementById('pcp-stock').value) || null,
+                K: parseFloat(document.getElementById('pcp-strike').value) || null,
+                C: parseFloat(document.getElementById('pcp-call').value) || null,
+                P: parseFloat(document.getElementById('pcp-put').value) || null,
+                r: (parseFloat(document.getElementById('pcp-rate').value) || 5) / 100,
+                T: parseFloat(document.getElementById('pcp-time').value) || 0.5
+            };
+        }
+        
+        function calculatePCP() {
+            const { S, K, C, P, r, T } = getPCPInputs();
+            const resultLabel = document.getElementById('pcp-result-label');
+            const resultValue = document.getElementById('pcp-result-value');
+            const resultUnit = document.getElementById('pcp-result-unit');
+            const formula = document.getElementById('pcp-formula');
+            
+            const pvK = (k, rate, time) => k * Math.exp(-rate * time);
+            
+            if (pcpMode === 'call' && P !== null && S !== null && K !== null) {
+                const pv = pvK(K, r, T);
+                const calcC = P + S - pv;
+                resultLabel.textContent = 'Calculated Call Price';
+                resultValue.textContent = '$' + calcC.toFixed(2);
+                resultUnit.textContent = 'PV(K) = $' + pv.toFixed(2);
+                formula.innerHTML = 'C = P + S − K×e<sup>−rT</sup>';
+            } else if (pcpMode === 'put' && C !== null && S !== null && K !== null) {
+                const pv = pvK(K, r, T);
+                const calcP = C + pv - S;
+                resultLabel.textContent = 'Calculated Put Price';
+                resultValue.textContent = '$' + calcP.toFixed(2);
+                resultUnit.textContent = 'PV(K) = $' + pv.toFixed(2);
+                formula.innerHTML = 'P = C + K×e<sup>−rT</sup> − S';
+            } else if (pcpMode === 'stock' && C !== null && P !== null && K !== null) {
+                const pv = pvK(K, r, T);
+                const calcS = C - P + pv;
+                resultLabel.textContent = 'Implied Stock Price';
+                resultValue.textContent = '$' + calcS.toFixed(2);
+                resultUnit.textContent = 'PV(K) = $' + pv.toFixed(2);
+                formula.innerHTML = 'S = C − P + K×e<sup>−rT</sup>';
+            } else if (pcpMode === 'rate' && C !== null && P !== null && S !== null && K !== null) {
+                const rightSide = P + S - C;
+                if (rightSide > 0 && K > 0 && T > 0) {
+                    const calcR = Math.log(K / rightSide) / T * 100;
+                    resultLabel.textContent = 'Implied Risk-Free Rate';
+                    resultValue.textContent = calcR.toFixed(2) + '%';
+                    resultUnit.textContent = 'Annual rate';
+                    formula.innerHTML = 'r = ln(K / (P + S − C)) / T';
+                } else {
+                    resultValue.textContent = 'Invalid';
+                    resultUnit.textContent = 'Check inputs';
+                }
+            } else if (pcpMode === 'arbitrage' && C !== null && P !== null && S !== null && K !== null) {
+                const pv = pvK(K, r, T);
+                const diff = (C + pv) - (P + S);
+                resultLabel.textContent = 'Parity Difference';
+                resultValue.textContent = (diff >= 0 ? '+' : '') + '$' + diff.toFixed(2);
+                resultUnit.textContent = Math.abs(diff) < 0.05 ? '✓ No arbitrage' : '⚠️ Arbitrage exists';
+                formula.innerHTML = '(C + PV(K)) − (P + S)';
+            } else {
+                resultValue.textContent = '—';
+                resultUnit.textContent = 'Enter required values';
+            }
+        }
+        
+        document.querySelectorAll('#pcp-calculator .input-field').forEach(input => {
+            input.addEventListener('input', calculatePCP);
+        });
+        
+        // ============ STRATEGY BUILDER ============
+        let strategyLegs = [];
+        let legCounter = 0;
+        
+        function addLeg(type = 'call', position = 'long', strike = 100, premium = 5, quantity = 1) {
+            legCounter++;
+            const leg = { id: legCounter, type, position, strike, premium, quantity };
+            strategyLegs.push(leg);
+            renderLegs();
+            calculateStrategy();
+        }
+        
+        function removeLeg(id) {
+            strategyLegs = strategyLegs.filter(leg => leg.id !== id);
+            renderLegs();
+            calculateStrategy();
+        }
+        
+        function renderLegs() {
+            const container = document.getElementById('strategy-legs');
+            container.innerHTML = strategyLegs.map(leg => `
+                <div class="leg-card">
+                    <div class="leg-header">
+                        <span class="leg-title">Leg ${leg.id}</span>
+                        <button class="leg-remove" onclick="removeLeg(${leg.id})">×</button>
+                    </div>
+                    <div class="leg-inputs">
+                        <select class="leg-input" onchange="updateLeg(${leg.id}, 'position', this.value)">
+                            <option value="long" ${leg.position === 'long' ? 'selected' : ''}>Long</option>
+                            <option value="short" ${leg.position === 'short' ? 'selected' : ''}>Short</option>
+                        </select>
+                        <select class="leg-input" onchange="updateLeg(${leg.id}, 'type', this.value)">
+                            <option value="call" ${leg.type === 'call' ? 'selected' : ''}>Call</option>
+                            <option value="put" ${leg.type === 'put' ? 'selected' : ''}>Put</option>
+                            <option value="stock" ${leg.type === 'stock' ? 'selected' : ''}>Stock</option>
+                        </select>
+                        <input type="number" class="leg-input" value="${leg.strike}" placeholder="Strike" onchange="updateLeg(${leg.id}, 'strike', this.value)">
+                        <input type="number" class="leg-input" value="${leg.premium}" placeholder="Premium" onchange="updateLeg(${leg.id}, 'premium', this.value)">
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function updateLeg(id, field, value) {
+            const leg = strategyLegs.find(l => l.id === id);
+            if (leg) {
+                leg[field] = field === 'strike' || field === 'premium' ? parseFloat(value) : value;
+                calculateStrategy();
+            }
+        }
+        
+        function loadStrategy(name) {
+            strategyLegs = [];
+            legCounter = 0;
+            const S = parseFloat(document.getElementById('strat-stock').value) || 100;
+            
+            const strategies = {
+                longCall: [{ type: 'call', position: 'long', strike: S, premium: 5 }],
+                longPut: [{ type: 'put', position: 'long', strike: S, premium: 5 }],
+                coveredCall: [
+                    { type: 'stock', position: 'long', strike: S, premium: S },
+                    { type: 'call', position: 'short', strike: S * 1.05, premium: 3 }
+                ],
+                protectivePut: [
+                    { type: 'stock', position: 'long', strike: S, premium: S },
+                    { type: 'put', position: 'long', strike: S * 0.95, premium: 3 }
+                ],
+                bullCallSpread: [
+                    { type: 'call', position: 'long', strike: S * 0.95, premium: 7 },
+                    { type: 'call', position: 'short', strike: S * 1.05, premium: 3 }
+                ],
+                bearPutSpread: [
+                    { type: 'put', position: 'long', strike: S * 1.05, premium: 7 },
+                    { type: 'put', position: 'short', strike: S * 0.95, premium: 3 }
+                ],
+                longStraddle: [
+                    { type: 'call', position: 'long', strike: S, premium: 5 },
+                    { type: 'put', position: 'long', strike: S, premium: 5 }
+                ],
+                ironCondor: [
+                    { type: 'put', position: 'short', strike: S * 0.95, premium: 2 },
+                    { type: 'put', position: 'long', strike: S * 0.90, premium: 1 },
+                    { type: 'call', position: 'short', strike: S * 1.05, premium: 2 },
+                    { type: 'call', position: 'long', strike: S * 1.10, premium: 1 }
+                ]
+            };
+            
+            (strategies[name] || []).forEach(leg => {
+                addLeg(leg.type, leg.position, Math.round(leg.strike * 100) / 100, leg.premium, 1);
+            });
+        }
+        
+        function calculateStrategy() {
+            const S = parseFloat(document.getElementById('strat-stock').value) || 100;
+            
+            // Calculate net premium
+            let netPremium = 0;
+            strategyLegs.forEach(leg => {
+                const mult = leg.position === 'long' ? -1 : 1;
+                if (leg.type !== 'stock') {
+                    netPremium += mult * leg.premium;
+                }
+            });
+            
+            document.getElementById('strat-premium').textContent = '$' + Math.abs(netPremium).toFixed(2);
+            document.getElementById('strat-premium-type').textContent = netPremium >= 0 ? 'Credit Received' : 'Debit Paid';
+            
+            // Calculate payoff at different prices
+            const prices = [];
+            const payoffs = [];
+            for (let price = S * 0.7; price <= S * 1.3; price += S * 0.01) {
+                prices.push(price);
+                let payoff = 0;
+                strategyLegs.forEach(leg => {
+                    const mult = leg.position === 'long' ? 1 : -1;
+                    if (leg.type === 'call') {
+                        payoff += mult * (Math.max(0, price - leg.strike) - leg.premium);
+                    } else if (leg.type === 'put') {
+                        payoff += mult * (Math.max(0, leg.strike - price) - leg.premium);
+                    } else if (leg.type === 'stock') {
+                        payoff += mult * (price - leg.premium);
+                    }
+                });
+                payoffs.push(payoff);
+            }
+            
+            const maxProfit = Math.max(...payoffs);
+            const maxLoss = Math.min(...payoffs);
+            
+            document.getElementById('strat-max-profit').textContent = maxProfit > 1000 ? 'Unlimited' : '$' + maxProfit.toFixed(0);
+            document.getElementById('strat-max-loss').textContent = maxLoss < -1000 ? 'Unlimited' : '$' + maxLoss.toFixed(0);
+            
+            // Find breakeven
+            const breakevens = [];
+            for (let i = 1; i < payoffs.length; i++) {
+                if ((payoffs[i-1] < 0 && payoffs[i] >= 0) || (payoffs[i-1] >= 0 && payoffs[i] < 0)) {
+                    breakevens.push(prices[i].toFixed(2));
+                }
+            }
+            document.getElementById('strat-breakeven').textContent = breakevens.length > 0 ? '$' + breakevens.join(', $') : '—';
+            
+            // Draw payoff chart
+            drawPayoffChart(prices, payoffs, S);
+        }
+        
+        function drawPayoffChart(prices, payoffs, currentPrice) {
+            const canvas = document.getElementById('payoff-canvas');
+            const ctx = canvas.getContext('2d');
+            const rect = canvas.getBoundingClientRect();
+            canvas.width = rect.width * 2;
+            canvas.height = rect.height * 2;
+            ctx.scale(2, 2);
+            
+            const width = rect.width;
+            const height = rect.height;
+            const padding = 30;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            if (payoffs.length === 0) return;
+            
+            const minPayoff = Math.min(...payoffs, 0);
+            const maxPayoff = Math.max(...payoffs, 0);
+            const range = maxPayoff - minPayoff || 1;
+            
+            const scaleX = (width - padding * 2) / (prices.length - 1);
+            const scaleY = (height - padding * 2) / range;
+            
+            // Draw zero line
+            const zeroY = padding + (maxPayoff / range) * (height - padding * 2);
+            ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(padding, zeroY);
+            ctx.lineTo(width - padding, zeroY);
+            ctx.stroke();
+            
+            // Draw payoff line
+            ctx.strokeStyle = '#00b4d8';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            payoffs.forEach((payoff, i) => {
+                const x = padding + i * scaleX;
+                const y = padding + ((maxPayoff - payoff) / range) * (height - padding * 2);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+            
+            // Fill profit area
+            ctx.fillStyle = 'rgba(87,204,153,0.2)';
+            ctx.beginPath();
+            ctx.moveTo(padding, zeroY);
+            payoffs.forEach((payoff, i) => {
+                if (payoff >= 0) {
+                    const x = padding + i * scaleX;
+                    const y = padding + ((maxPayoff - payoff) / range) * (height - padding * 2);
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.lineTo(width - padding, zeroY);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Fill loss area
+            ctx.fillStyle = 'rgba(255,107,107,0.2)';
+            ctx.beginPath();
+            ctx.moveTo(padding, zeroY);
+            payoffs.forEach((payoff, i) => {
+                if (payoff < 0) {
+                    const x = padding + i * scaleX;
+                    const y = padding + ((maxPayoff - payoff) / range) * (height - padding * 2);
+                    ctx.lineTo(x, y);
+                }
+            });
+            ctx.lineTo(width - padding, zeroY);
+            ctx.closePath();
+            ctx.fill();
+        }
+        
+        document.getElementById('strat-stock').addEventListener('input', calculateStrategy);
+        
+        // ============ BLACK-SCHOLES CALCULATOR ============
+        function normalCDF(x) {
+            const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741;
+            const a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+            const sign = x < 0 ? -1 : 1;
+            x = Math.abs(x) / Math.sqrt(2);
+            const t = 1.0 / (1.0 + p * x);
+            const y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+            return 0.5 * (1.0 + sign * y);
+        }
+        
+        function normalPDF(x) {
+            return Math.exp(-0.5 * x * x) / Math.sqrt(2 * Math.PI);
+        }
+        
+        function calculateBS() {
+            const S = parseFloat(document.getElementById('bs-stock').value) || 100;
+            const K = parseFloat(document.getElementById('bs-strike').value) || 100;
+            const T = parseFloat(document.getElementById('bs-time').value) || 0.5;
+            const r = (parseFloat(document.getElementById('bs-rate').value) || 5) / 100;
+            const sigma = (parseFloat(document.getElementById('bs-volatility').value) || 20) / 100;
+            const q = (parseFloat(document.getElementById('bs-dividend').value) || 0) / 100;
+            
+            if (T <= 0 || sigma <= 0) {
+                document.getElementById('bs-call-price').textContent = '—';
+                document.getElementById('bs-put-price').textContent = '—';
+                return;
+            }
+            
+            const sqrtT = Math.sqrt(T);
+            const d1 = (Math.log(S / K) + (r - q + 0.5 * sigma * sigma) * T) / (sigma * sqrtT);
+            const d2 = d1 - sigma * sqrtT;
+            
+            const Nd1 = normalCDF(d1);
+            const Nd2 = normalCDF(d2);
+            const Nmd1 = normalCDF(-d1);
+            const Nmd2 = normalCDF(-d2);
+            
+            const expQT = Math.exp(-q * T);
+            const expRT = Math.exp(-r * T);
+            
+            // Option prices
+            const callPrice = S * expQT * Nd1 - K * expRT * Nd2;
+            const putPrice = K * expRT * Nmd2 - S * expQT * Nmd1;
+            
+            document.getElementById('bs-call-price').textContent = '$' + callPrice.toFixed(2);
+            document.getElementById('bs-put-price').textContent = '$' + putPrice.toFixed(2);
+            
+            // Greeks (for call)
+            const delta = expQT * Nd1;
+            const gamma = expQT * normalPDF(d1) / (S * sigma * sqrtT);
+            const theta = (-S * expQT * normalPDF(d1) * sigma / (2 * sqrtT) 
+                          - r * K * expRT * Nd2 
+                          + q * S * expQT * Nd1) / 365;
+            const vega = S * expQT * normalPDF(d1) * sqrtT / 100;
+            const rho = K * T * expRT * Nd2 / 100;
+            
+            document.getElementById('bs-delta').textContent = delta.toFixed(4);
+            document.getElementById('bs-gamma').textContent = gamma.toFixed(4);
+            document.getElementById('bs-theta').textContent = theta.toFixed(4);
+            document.getElementById('bs-vega').textContent = vega.toFixed(4);
+            document.getElementById('bs-rho').textContent = rho.toFixed(4);
+        }
+        
+        document.querySelectorAll('#bs-calculator .input-field').forEach(input => {
+            input.addEventListener('input', calculateBS);
+        });
+        
+        // ============ SLIDE SCALING ============
+        const slideWidth = 1280;
+        const slideHeight = 720;
+        function scalePresentationSlides() {
+            const wrappers = document.querySelectorAll('.slide-wrapper');
+            wrappers.forEach(wrapper => {
+                const iframe = wrapper.querySelector('.slide-iframe');
+                if (iframe && wrapper.offsetWidth > 0) {
+                    const scale = wrapper.offsetWidth / slideWidth;
+                    iframe.style.transform = `scale(${scale})`;
+                    iframe.style.width = `${slideWidth}px`;
+                    iframe.style.height = `${slideHeight}px`;
+                    wrapper.style.height = `${slideHeight * scale}px`;
+                    wrapper.style.width = '100%';
+                }
+            });
+        }
+        
+        function initScaling() {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', scalePresentationSlides);
+            } else {
+                scalePresentationSlides();
+            }
+        }
+        
+        if (window.ResizeObserver) {
+            const resizeObserver = new ResizeObserver(() => scalePresentationSlides());
+            document.addEventListener('DOMContentLoaded', () => {
+                document.querySelectorAll('.slide-wrapper').forEach(w => resizeObserver.observe(w));
+            });
+        }
+        
+        initScaling();
+        window.addEventListener('resize', () => setTimeout(scalePresentationSlides, 100));
+        setTimeout(scalePresentationSlides, 100);
+        setTimeout(scalePresentationSlides, 500);
+        
+        // Initialize calculators
+        document.addEventListener('DOMContentLoaded', () => {
+            calculatePCP();
+            calculateBS();
+            loadStrategy('longCall');
+        });
+        
+        // Fallback init
+        calculatePCP();
+        calculateBS();
+        setTimeout(() => loadStrategy('longCall'), 100);
+    </script>
+</body>
+</html>

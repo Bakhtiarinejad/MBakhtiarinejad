@@ -33,6 +33,12 @@ export const courses: Course[] = [
         description: 'The Fundamental Relationship with Interactive Calculator',
         duration: '40 minutes',
       },
+      {
+        id: 'option-calculators',
+        title: 'Option Calculators',
+        description: 'Put-Call Parity, Strategy Builder & Black-Scholes',
+        duration: '30 minutes',
+      },
     ],
   },
   {

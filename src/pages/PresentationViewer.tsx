@@ -16,6 +16,7 @@ export function PresentationViewer() {
   const presentationMap: Record<string, string> = {
     'options-trading-intro': '/presentation-options-trading.html',
     'put-call-parity': '/presentation-put-call-parity.html',
+    'option-calculators': '/presentation-option-calculators.html',
     'microeconomics-intro': '/presentation-microeconomics.html',
     'supply-demand': '/presentation-supply-demand.html',
     'elasticity': '/presentation-elasticity.html',
